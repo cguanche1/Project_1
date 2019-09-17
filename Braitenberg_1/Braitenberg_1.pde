@@ -151,14 +151,14 @@ class Machine{
  Machine(){
    x = int(random(ledge,redge));
    y = int(random(tedge,bedge));
-   r = int(random(0,((1/4) * redge-ledge)));
+   r = int(random(0,(redge-ledge)/2));
    i = int(random(0,50));
    o = random(-180,180);
    vmax = random(5,10);
    vmin = random(0,5);
-   prefr = random(0.0001,0.5);
-   prefg = random(prefr,0.66);
-   prefb = 1 - prefr - prefg;
+   prefr = random(0.0001,0.50);
+   prefg = random(0.0001,0.50);
+   prefb = random(0.0001,0.50);
    
    signr = random(-1,1);
    if(signr < 0){
@@ -189,11 +189,14 @@ class Machine{
    crossed = int(random(0,2));
    if(crossed == 1){crossed = 2;}
    
+   print("Machine " + assocPanel + " has an i of " + i +" and an r of " + r + "\n");
+   //delay(3000);
    
  }
  
  int getX(float mag, float ang){
     int changeX = ceil(mag * cos(ang));
+    
     int newX = x + changeX;
     if(newX > redge){
       newX = newX - (redge - ledge);
@@ -201,11 +204,15 @@ class Machine{
     else if(newX < ledge){
       newX = newX + (redge - ledge);
     }
+    
+    
     return newX;
+    
  }
  
  int getY(float mag, float ang){
     int changeY = ceil(mag*sin(ang));
+    
     int newY = y + changeY;
     if(newY > bedge){
       newY = newY - (bedge-tedge);
@@ -218,8 +225,8 @@ class Machine{
  }
  
  void stain(){
-   print("Staining machine " +assocPanel+" right now!\n");
-   print("Machine " + assocPanel + " has i = " + i + "\n");
+   //print("Staining machine " +assocPanel+" right now!\n");
+   //print("Machine " + assocPanel + " has i = " + i + "\n");
     for(int c = 0; c < i; c++){
        //float angleStep = ((i - c)/(i * 8)) * 180;
        for(float ang = -180; ang <= 180; ang += 5){
@@ -231,7 +238,7 @@ class Machine{
           float ptb = blue(old);
           
           //print("old red: " + ptr);
-          ptr += signr * prefr * 255 * ((i-c)/i);
+          ptr = ptr + (signr * prefr *prefr* 255 * ((i-c)/i));
           if(ptr < 0){
               ptr = 0;
               signr = -1 * signr;
@@ -241,7 +248,7 @@ class Machine{
               signr = -1 * signr;
           }
           //print(" new red: " + ptr +"\n old green: " + ptg);
-          ptg += signg * prefg * 255 * ((i-c)/i);
+          ptg += signg * prefg *prefg* 255 * ((i-c)/i);
           if(ptg < 0){
               ptg = 0;
               signg = -1 * signg;
@@ -251,7 +258,7 @@ class Machine{
               signg = -1* signg;
           }
           //print(" new green: " + ptg + "\n old blue: " + ptb);
-          ptb += signb * prefb * 255 * ((i-c)/i);
+          ptb += signb * prefb *prefb * 255 * ((i-c)/i);
           if(ptb < 0){
               ptb = 0;
               signb = -1 * signb;
@@ -266,10 +273,11 @@ class Machine{
           
        }
     }
-    print("new color has been set for " + assocPanel +"\n");
+    //print("new color has been set for " + assocPanel +"\n");
  }
  
  void move(){  
+     //print("machine " + assocPanel + " is moving!\n");
      float lang = o + 90;
      if(lang > 180){
         lang = lang - 360; 
@@ -283,8 +291,12 @@ class Machine{
      int lx = getX(r, lang);
      int ly = getY(r, lang);
      
+     //fill(255,255,255);
+     //circle(lx,ly,5);
+     
      int rx = getX(r, rang);
      int ry = getY(r, rang);
+     //circle(rx,ry,5);
      
      color lc = get(lx,ly);
      color rc = get(rx,ry);
@@ -303,8 +315,16 @@ class Machine{
      float scale = vmax/255;
      
      float lv = scale * (lr*prefr + lg * prefg + lb * prefb);
+     //print("scale: " + scale + " lr: " +lr+ " prefr: " + prefr + " lg: " + lg +" prefg: " + prefg + " lb: " + lb + " prefb: " + prefb + "\n");
+     if(lv < vmin){
+      lv = vmin; 
+     }
      float rv = scale * (rr * prefr + rg * prefg + rb * prefb);
+     if(rv < vmin){
+       rv = vmin; 
+     }
      
+
      if(crossed > 1){
         float temp = rv;
         rv = lv;
@@ -312,10 +332,20 @@ class Machine{
      }
      
      float oChange = (lv - rv) * (180/vmax);
+     float oNew = o + oChange;
+     if(oNew > 180){
+       oNew = oNew - 360;
+     }
+     else if(oNew < -180){
+        oNew = oNew + 360; 
+     }
      
-     float avgO = (o + o + oChange)/2;
+     float avgO = (o + oNew)/2;
+
      x = getX(lv+rv, avgO);
+     
      y = getY(lv+rv,avgO);
+     o = oNew;
      
  }
   
