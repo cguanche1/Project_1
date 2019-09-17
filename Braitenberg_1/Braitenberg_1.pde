@@ -76,6 +76,7 @@ void setup() {
  
 void draw() {
     for(int i = 0; i < num_active_machines; i++){
+        Machine m = machines[i];
         
     }
 }
@@ -134,8 +135,10 @@ class Machine{
  float o; // -180 < o <= 180, angle measured from horizontal right of machine
  float vmax,vmin; //maximum and minimum velocity, respectively
  float prefr, prefg, prefb; // "preference" for each color base
+ float signr, signg, signb; // determines whether preference is positive or negative
  int assocPanel; //panel associated with this machine's mood
  int crossed; //boolean that determines whether the machine's wires are crossed or not
+ 
  Machine(){
    x = int(random(ledge,redge));
    y = int(random(tedge,bedge));
@@ -147,11 +150,129 @@ class Machine{
    prefr = random(0.5);
    prefg = random(prefr,0.66);
    prefb = 1 - prefr - prefg;
+   
+   signr = random(-1,1);
+   if(signr < 0){
+      signr = -1; 
+   }
+   else{
+     signr = 1;
+   }
+   
+   signg = random(-1,1);
+   if(signg < 0){
+      signg = -1; 
+   }
+   else{
+       signg = 1;
+   }
+   
+   signb = random(-1,1);
+   if(signb < 0){
+      signb = -1; 
+   }
+   else{
+       signb = 1;
+   }
+   
    assocPanel = num_active_machines;
    num_active_machines++;
    crossed = int(random(0,2));
-   if(crossed == 2){crossed = 1;}
+   if(crossed == 1){crossed = 2;}
+   
+   
  }
  
+ int getX(float mag, float ang){
+    int changeX = ceil(mag * cos(ang));
+    int newX = x + changeX;
+    if(newX > redge){
+      newX = newX - (redge - ledge);
+    }
+    else if(newX < ledge){
+      newX = newX + (redge - ledge);
+    }
+    return newX;
+ }
+ 
+ int getY(float mag, float ang){
+    int changeY = ceil(mag*sin(ang));
+    int newY = y + changeY;
+    if(newY > bedge){
+      newY = newY - (bedge-tedge);
+    }
+    else if(newY < tedge){
+      newY = newY + (bedge - tedge);
+    }
+    
+    return newY;
+ }
+ 
+ void stain(){
+    for(int c = 0; c < i; c++){
+       float angleStep = ((i - c)/(i * 8)) * 180;
+       for(float ang = -180; ang <= 180; ang += angleStep){
+          int ptx = getX(ang,c);
+          int pty = getY(ang,c);
+          color old = get(ptx,pty);
+          float ptr = red(old);
+          float ptg = green(old);
+          float ptb = blue(old);
+            
+          ptr += signr * prefr * 255 * ((i-c)/i);
+          ptg += signg * prefg * 255 * ((i-c)/i);
+          ptb += signb * prefb * 255 * ((i-c)/i);
+          
+          set(ptx,pty,color(ptr,ptg,ptb));
+       }
+    }
+ }
+ 
+ void move(){  
+     float lang = o + 90;
+     if(lang > 180){
+        lang = lang - 360; 
+     }
+     
+     float rang = 0 - 90;
+     if(rang < -180){
+        rang = rang + 360; 
+     }
+     
+     int lx = getX(r, lang);
+     int ly = getY(r, lang);
+     
+     int rx = getX(r, rang);
+     int ry = getY(r, rang);
+     
+     color lc = get(lx,ly);
+     color rc = get(rx,ry);
+     
+     float lr = red(lc);
+     float lg = green(lc);
+     float lb = blue(lc);
+     
+     float rr = red(rc);
+     float rg = green(rc);
+     float rb = blue(rc);
+     
+     float scale = vmax/255;
+     
+     float lv = scale * (lr*prefr + lg * prefg + lb * prefb);
+     float rv = scale * (rr * prefr + rg * prefg + rb * prefb);
+     
+     if(crossed > 1){
+        float temp = rv;
+        rv = lv;
+        lv = temp;
+     }
+     
+     float oChange = (lv - rv) * (180/vmax);
+     
+     float avgO = (o + o + oChange)/2;
+     x = getX(lv+rv, avgO);
+     y = getY(lv+rv,avgO);
+     
+ }
   
 }
