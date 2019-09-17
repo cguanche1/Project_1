@@ -32,6 +32,7 @@ static int bedge = 767;
 static int max_active_machines = 15;
 int num_active_machines = 0;
 Machine machines[] = new Machine[max_active_machines];
+int active_machine = 0;
 
 //Array of hall panels
 Panel panels[] = new Panel[15];
@@ -42,8 +43,11 @@ Panel panels[] = new Panel[15];
   Color each panel in a gradient as they are activated
 */
 void setup() {
-  fullScreen(2);
+  //fullScreen(2);
+  size(1024,768);
   background(0, 0, 0);
+  //fill(100,100,100);
+  //rect(ledge,tedge,redge,bedge);
   noStroke();
   
   panels[0] = new Panel(578, 660);
@@ -72,29 +76,34 @@ void setup() {
   for(int i = 0; i < max_active_machines; i ++){
      machines[i] = new Machine(); 
   }
+  colorMode(RGB);
 }
  
 void draw() {
-    for(int i = 0; i < num_active_machines; i++){
-        Machine m = machines[i];
-        
+    //fill(50,50,50);
+    //rect(ledge,tedge,redge,bedge);
+    
+    if(active_machine >= num_active_machines){
+       active_machine = 0; 
     }
+    
+    Machine m = machines[active_machine];
+    
+    //int xorig = m.x;
+    //int yorig = m.y;
+    m.stain();
+    m.move();
+    //stroke(255,255,255);
+    //line(xorig,yorig,m.x,m.y);
+  
+    active_machine++;
+    //delay(5000);
 }
 
 void keyPressed() {
   if (key == CODED) {
   }
 }
-
-class Device {
- int x, y;
- int r, g, b;
- int panel;
- 
-  
-}
-
-
 
 
 class Panel {
@@ -143,11 +152,11 @@ class Machine{
    x = int(random(ledge,redge));
    y = int(random(tedge,bedge));
    r = int(random(0,((1/4) * redge-ledge)));
-   i = int(random(0,((1/2) * redge-ledge)));
+   i = int(random(0,50));
    o = random(-180,180);
    vmax = random(5,10);
    vmin = random(0,5);
-   prefr = random(0.5);
+   prefr = random(0.0001,0.5);
    prefg = random(prefr,0.66);
    prefb = 1 - prefr - prefg;
    
@@ -209,23 +218,55 @@ class Machine{
  }
  
  void stain(){
+   print("Staining machine " +assocPanel+" right now!\n");
+   print("Machine " + assocPanel + " has i = " + i + "\n");
     for(int c = 0; c < i; c++){
-       float angleStep = ((i - c)/(i * 8)) * 180;
-       for(float ang = -180; ang <= 180; ang += angleStep){
+       //float angleStep = ((i - c)/(i * 8)) * 180;
+       for(float ang = -180; ang <= 180; ang += 5){
           int ptx = getX(ang,c);
           int pty = getY(ang,c);
           color old = get(ptx,pty);
           float ptr = red(old);
           float ptg = green(old);
           float ptb = blue(old);
-            
+          
+          //print("old red: " + ptr);
           ptr += signr * prefr * 255 * ((i-c)/i);
+          if(ptr < 0){
+              ptr = 0;
+              signr = -1 * signr;
+          }
+          else if(ptr > 255){
+              ptr = 255;
+              signr = -1 * signr;
+          }
+          //print(" new red: " + ptr +"\n old green: " + ptg);
           ptg += signg * prefg * 255 * ((i-c)/i);
+          if(ptg < 0){
+              ptg = 0;
+              signg = -1 * signg;
+          }
+          else if(ptg > 255){
+              ptg = 255;
+              signg = -1* signg;
+          }
+          //print(" new green: " + ptg + "\n old blue: " + ptb);
           ptb += signb * prefb * 255 * ((i-c)/i);
+          if(ptb < 0){
+              ptb = 0;
+              signb = -1 * signb;
+          }
+          else if(ptb > 255){
+              ptb = 255;
+              signb = -1 * signb;
+          }
+          //print(" new blue: " + ptb + "\n");
           
           set(ptx,pty,color(ptr,ptg,ptb));
+          
        }
     }
+    print("new color has been set for " + assocPanel +"\n");
  }
  
  void move(){  
@@ -255,6 +296,9 @@ class Machine{
      float rr = red(rc);
      float rg = green(rc);
      float rb = blue(rc);
+     
+     color mid = lerpColor(lc, rc, 0.5);
+     panels[assocPanel].colourMe(int(red(mid)),int(green(mid)),int(blue(mid)));
      
      float scale = vmax/255;
      
