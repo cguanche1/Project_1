@@ -28,6 +28,15 @@ static int redge = 1023;
 static int tedge = 0;
 static int bedge = 767;
 
+//Sets velocity contants
+static float max_vmax = 20;
+static float min_vmin = 5;
+
+//integers to control the screen's state and wipe it every so often.
+int step = 0;
+static int numSteps = 3750;
+int wash = 0;
+
 //Number of machines active
 static int max_active_machines = 15;
 int num_active_machines = 0;
@@ -73,7 +82,21 @@ void setup() {
     panels[i].show();
   }
   
-  for(int i = 0; i < max_active_machines; i ++){
+  
+  machines[0] = new Machine();
+  machines[0].x = ledge;
+  machines[0].y = tedge;
+  machines[0].o = -45.0;
+  machines[0].signr = -1;
+  machines[0].signg = -1;
+  machines[0].signb = -1;
+  machines[0].prefr = 0.5;
+  machines[0].prefg = 0.5;
+  machines[0].prefb = 0.5;
+  machines[0].r = redge-ledge;
+  machines[0].i = redge-ledge;
+  
+  for(int i = 1; i < max_active_machines; i ++){
      machines[i] = new Machine(); 
   }
   colorMode(RGB);
@@ -82,22 +105,32 @@ void setup() {
 void draw() {
     //fill(50,50,50);
     //rect(ledge,tedge,redge,bedge);
+    if(step < numSteps){ 
+      if(active_machine >= num_active_machines){
+         active_machine = 0; 
+      }
     
-    if(active_machine >= num_active_machines){
-       active_machine = 0; 
-    }
-    
-    Machine m = machines[active_machine];
+      Machine m = machines[active_machine];
     
     //int xorig = m.x;
     //int yorig = m.y;
-    m.stain();
-    m.move();
+      m.stain();
+      m.move();
     //stroke(255,255,255);
     //line(xorig,yorig,m.x,m.y);
-  
-    active_machine++;
+      active_machine++;
     //delay(5000);
+      step++;
+    }
+    if(step == numSteps && wash < bedge){
+       stroke(0,0,0);
+       line(ledge,wash,redge,wash);
+       wash++;
+    }
+    if(step == numSteps && wash == bedge){
+       step = 0;
+       wash = tedge;
+    }
 }
 
 void keyPressed() {
@@ -126,6 +159,7 @@ class Panel {
     r = setr;
     g = setg;
     b = setb;
+    show();
   }
   
   void show() {
@@ -154,8 +188,8 @@ class Machine{
    r = int(random(0,(redge-ledge)/2));
    i = int(random(0,50));
    o = random(-180,180);
-   vmax = random(5,10);
-   vmin = random(0,5);
+   vmax = random((max_vmax + min_vmin)/2,max_vmax);
+   vmin = random(min_vmin,(max_vmax+ min_vmin)/2);
    prefr = random(0.0001,0.50);
    prefg = random(0.0001,0.50);
    prefb = random(0.0001,0.50);
@@ -231,7 +265,10 @@ class Machine{
        //float angleStep = ((i - c)/(i * 8)) * 180;
        for(float ang = -180; ang <= 180; ang += 5){
           int ptx = getX(ang,c);
+         
           int pty = getY(ang,c);
+          
+          //print("ang: "+ang +" y: " + y + " pty: "+ pty+ "\n");
           color old = get(ptx,pty);
           float ptr = red(old);
           float ptg = green(old);
@@ -310,7 +347,40 @@ class Machine{
      float rb = blue(rc);
      
      color mid = lerpColor(lc, rc, 0.5);
-     panels[assocPanel].colourMe(int(red(mid)),int(green(mid)),int(blue(mid)));
+     
+     float rmid = red(mid);
+     float gmid = green(mid);
+     float bmid = blue(mid);
+     
+     panels[assocPanel].colourMe(int(rmid),int(gmid),int(bmid));
+     
+     prefr = ((rmid % 5)/255) * signr + prefr;
+     if(prefr >= 1){
+       prefr = 1;
+       signr = -1*signr;
+     }
+     else if(prefr <= 0){
+      prefr = 0.0001;
+      signr = -1* signr;
+     }
+     prefg = ((gmid % 5)/255) * signg + prefg;
+     if(prefg >= 1){
+       prefg = 1;
+       signg = -1*signg;
+     }
+     else if(prefg <= 0){
+      prefg = 0.0001;
+      signg = -1* signg;
+     }
+     prefb = ((bmid % 5)/255) * signb + prefb;
+     if(prefb >= 1){
+       prefb = 1;
+       signb = -1*signb;
+     }
+     else if(prefb <= 0){
+      prefb = 0.0001;
+      signb = -1* signb;
+     }
      
      float scale = vmax/255;
      
