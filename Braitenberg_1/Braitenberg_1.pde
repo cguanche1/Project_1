@@ -129,6 +129,11 @@ void draw() {
     if(step == numSteps && wash == bedge){
        step = 0;
        wash = tedge;
+       for(int i = 0; i < num_active_machines; i++){
+           machines[i].prefr = random(0.0001,0.50);
+           machines[i].prefg = random(0.0001,0.50);
+           machines[i].prefb = random(0.0001,0.50); 
+       }
     }
 }
 
