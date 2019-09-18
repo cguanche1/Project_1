@@ -69,8 +69,8 @@ void setup() {
   
   panels[8] = new Panel(306, 570);
   panels[9] = new Panel(283, 590);
-  panels[10] = new Panel(183, 592);
-  panels[11] = new Panel(125, 612);
+  panels[10] = new Panel(183, 571);
+  panels[11] = new Panel(159, 555);
   
   panels[12] = new Panel(88, 592);
   panels[13] = new Panel(64, 612);
