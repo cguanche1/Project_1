@@ -52,8 +52,7 @@ Panel panels[] = new Panel[15];
   Color each panel in a gradient as they are activated
 */
 void setup() {
-  //fullScreen(2);
-  size(1024,768);
+  fullScreen(2);
   background(0, 0, 0);
   //fill(100,100,100);
   //rect(ledge,tedge,redge,bedge);
