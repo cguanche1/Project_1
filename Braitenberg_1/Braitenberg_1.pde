@@ -29,8 +29,8 @@ static int tedge = 0;
 static int bedge = 767;
 
 //Sets velocity contants
-static float max_vmax = 20;
-static float min_vmin = 5;
+static float max_vmax = 25;
+static float min_vmin = 10;
 
 //integers to control the screen's state and wipe it every so often.
 int step = 0;
@@ -130,9 +130,9 @@ void draw() {
        step = 0;
        wash = tedge;
        for(int i = 0; i < num_active_machines; i++){
-           machines[i].prefr = random(0.0001,0.50);
-           machines[i].prefg = random(0.0001,0.50);
-           machines[i].prefb = random(0.0001,0.50); 
+           machines[i].prefr = random(0.0001,0.66);
+           machines[i].prefg = random(0.0001,0.66);
+           machines[i].prefb = random(0.0001,0.66); 
        }
     }
 }
@@ -194,9 +194,9 @@ class Machine{
    o = random(-180,180);
    vmax = random((max_vmax + min_vmin)/2,max_vmax);
    vmin = random(min_vmin,(max_vmax+ min_vmin)/2);
-   prefr = random(0.0001,0.50);
-   prefg = random(0.0001,0.50);
-   prefb = random(0.0001,0.50);
+   prefr = random(0.0001,0.66);
+   prefg = random(0.0001,0.66);
+   prefb = random(0.0001,0.66);
    
    signr = random(-1,1);
    if(signr < 0){
