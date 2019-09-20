@@ -7,6 +7,8 @@ Aside from the large contiguous display inside the cafe, the square display pane
 
 Included is a diagram of areas of the screen space that are mapped to the labeled physical display spaces.
 
+Link to Carlos' Finished Project: https://www.youtube.com/watch?v=KPm2EWBz6EY&feature=youtu.be
+
 
 
 The Becton Center wall display is divided into 17 different sections. The native resolution of the entire display is 1024 x 768.
